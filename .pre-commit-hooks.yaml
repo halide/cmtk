@@ -1,0 +1,15 @@
+- id: cmtk
+  name: cmtk
+  description: Format CMake files in place with cmtk.
+  entry: cmtk format --discover=git -i
+  language: rust
+  files: (^|/)CMakeLists\.txt$|\.cmake(\.in)?$
+  require_serial: true
+
+- id: cmtk-check
+  name: cmtk (check)
+  description: Check that CMake files are formatted with cmtk, without modifying them.
+  entry: cmtk format --discover=git --check
+  language: rust
+  files: (^|/)CMakeLists\.txt$|\.cmake(\.in)?$
+  require_serial: true

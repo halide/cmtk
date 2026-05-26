@@ -1,0 +1,6 @@
+[submodule "tests/data/cmake"]
+	path = tests/data/cmake
+	url = https://gitlab.kitware.com/cmake/cmake.git
+[submodule "tests/data/halide"]
+	path = tests/data/halide
+	url = https://github.com/halide/Halide.git

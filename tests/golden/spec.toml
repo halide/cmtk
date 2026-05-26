@@ -1,0 +1,374 @@
+# Golden regression cases for real-world CMake formatting.
+#
+# Paths are relative to the repository root. Rebuild committed outputs with:
+#
+#   UPDATE_GOLDENS=1 cargo test golden_regressions
+
+[scan_sets.halide-definitions]
+files = [
+    "tests/data/halide/CMakeLists.txt",
+    "tests/data/halide/apps/CMakeLists.txt",
+    "tests/data/halide/apps/hannk/halide/CMakeLists.txt",
+    "tests/data/halide/apps/linear_algebra/src/CMakeLists.txt",
+    "tests/data/halide/cmake/CheckFilesExist.cmake",
+    "tests/data/halide/cmake/FindHalide_LLVM.cmake",
+    "tests/data/halide/cmake/HalideFeatures.cmake",
+    "tests/data/halide/cmake/HalideGeneratorHelpers.cmake",
+    "tests/data/halide/cmake/HalidePackageConfigHelpers.cmake",
+    "tests/data/halide/cmake/HalideTargetHelpers.cmake",
+    "tests/data/halide/cmake/HalideTestHelpers.cmake",
+    "tests/data/halide/cmake/TargetExportScript.cmake",
+    "tests/data/halide/cmake/WipeStandardFlags.cmake",
+    "tests/data/halide/dependencies/spirv/share/cmake/SPIRV-Headers/SPIRV-HeadersConfig.cmake",
+    "tests/data/halide/packaging/CMakeLists.txt",
+    "tests/data/halide/packaging/common/HalideConfig.cmake",
+    "tests/data/halide/packaging/pip/CMakeLists.txt",
+    "tests/data/halide/python_bindings/cmake/AddPythonTest.cmake",
+    "tests/data/halide/python_bindings/test/generators/CMakeLists.txt",
+    "tests/data/halide/src/autoschedulers/CMakeLists.txt",
+    "tests/data/halide/test/autoschedulers/anderson2021/CMakeLists.txt",
+    "tests/data/halide/test/generator/CMakeLists.txt",
+    "tests/data/halide/test/runtime/CMakeLists.txt",
+    "tests/data/halide/tutorial/CMakeLists.txt",
+]
+
+[[cases]]
+name = "cmake-top-level-defaults"
+inputs = ["tests/data/cmake/CMakeLists.txt"]
+golden = "tests/golden/outputs/cmake-top-level-defaults.cmake"
+
+[cases.config]
+indent_width = 2
+
+[[cases]]
+name = "halide-hannk-80-columns"
+inputs = ["tests/data/halide/apps/hannk/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-hannk-80-columns.cmake"
+scan_sets = ["halide-definitions"]
+
+[cases.config]
+line_width = 80
+
+[[cases]]
+name = "halide-top-level-scan-schema"
+inputs = ["tests/data/halide/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-top-level-scan-schema.cmake"
+scan_sets = ["halide-definitions"]
+
+[cases.config]
+line_width = 88
+
+[cases.config.function_schemas.halide_feature]
+options = ["ADVANCED"]
+one_value_keywords = ["TYPE"]
+multi_value_keywords = ["DEPENDS"]
+
+[[cases]]
+name = "halide-longest-01-src"
+inputs = ["tests/data/halide/src/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-01-src.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-02-test-correctness"
+inputs = ["tests/data/halide/test/correctness/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-02-test-correctness.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-03-src-runtime"
+inputs = ["tests/data/halide/src/runtime/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-03-src-runtime.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-04-apps-hannk"
+inputs = ["tests/data/halide/apps/hannk/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-04-apps-hannk.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-05-apps-onnx"
+inputs = ["tests/data/halide/apps/onnx/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-05-apps-onnx.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-06-test-error"
+inputs = ["tests/data/halide/test/error/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-06-test-error.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-07-test-integration"
+inputs = ["tests/data/halide/test/integration/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-07-test-integration.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-08-apps-vcpkg-ports-tensorflow-lite-portfile"
+inputs = ["tests/data/halide/apps/vcpkg/ports/tensorflow-lite/portfile.cmake"]
+golden = "tests/golden/outputs/halide-longest-08-apps-vcpkg-ports-tensorflow-lite-portfile.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-09-dependencies-spirv-share-cmake-spirv-headers-spirv-headerstargets"
+inputs = ["tests/data/halide/dependencies/spirv/share/cmake/SPIRV-Headers/SPIRV-HeadersTargets.cmake"]
+golden = "tests/golden/outputs/halide-longest-09-dependencies-spirv-share-cmake-spirv-headers-spirv-headerstargets.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-10-dependencies-vulkan-share-cmake-vulkanheaders-vulkanheadersconfig"
+inputs = ["tests/data/halide/dependencies/vulkan/share/cmake/VulkanHeaders/VulkanHeadersConfig.cmake"]
+golden = "tests/golden/outputs/halide-longest-10-dependencies-vulkan-share-cmake-vulkanheaders-vulkanheadersconfig.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-11-tools"
+inputs = ["tests/data/halide/tools/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-11-tools.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-12-python-bindings-tutorial"
+inputs = ["tests/data/halide/python_bindings/tutorial/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-12-python-bindings-tutorial.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-13-apps-hannk-cmake-superbuild"
+inputs = ["tests/data/halide/apps/hannk/cmake/superbuild/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-13-apps-hannk-cmake-superbuild.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-14-apps-resize"
+inputs = ["tests/data/halide/apps/resize/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-14-apps-resize.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-15-python-bindings-src-halide"
+inputs = ["tests/data/halide/python_bindings/src/halide/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-15-python-bindings-src-halide.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-16-cmake-findhexagonsdk"
+inputs = ["tests/data/halide/cmake/FindHexagonSDK.cmake"]
+golden = "tests/golden/outputs/halide-longest-16-cmake-findhexagonsdk.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-17-python-bindings"
+inputs = ["tests/data/halide/python_bindings/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-17-python-bindings.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-18-python-bindings-apps"
+inputs = ["tests/data/halide/python_bindings/apps/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-18-python-bindings-apps.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-19-src-runtime-hexagon-remote"
+inputs = ["tests/data/halide/src/runtime/hexagon_remote/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-19-src-runtime-hexagon-remote.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-longest-20-python-bindings-packaging"
+inputs = ["tests/data/halide/python_bindings/packaging/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-longest-20-python-bindings-packaging.cmake"
+scan_sets = ["halide-definitions"]
+
+# Golden cases for each file in the halide-definitions scan set. These exercise
+# the helpers, find modules, and config files that define many of the macros
+# and functions the rest of the corpus calls into.
+
+[[cases]]
+name = "halide-defs-apps"
+inputs = ["tests/data/halide/apps/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-apps.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-apps-hannk-halide"
+inputs = ["tests/data/halide/apps/hannk/halide/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-apps-hannk-halide.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-apps-linear-algebra-src"
+inputs = ["tests/data/halide/apps/linear_algebra/src/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-apps-linear-algebra-src.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-cmake-check-files-exist"
+inputs = ["tests/data/halide/cmake/CheckFilesExist.cmake"]
+golden = "tests/golden/outputs/halide-defs-cmake-check-files-exist.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-cmake-find-halide-llvm"
+inputs = ["tests/data/halide/cmake/FindHalide_LLVM.cmake"]
+golden = "tests/golden/outputs/halide-defs-cmake-find-halide-llvm.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-cmake-halide-features"
+inputs = ["tests/data/halide/cmake/HalideFeatures.cmake"]
+golden = "tests/golden/outputs/halide-defs-cmake-halide-features.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-cmake-halide-generator-helpers"
+inputs = ["tests/data/halide/cmake/HalideGeneratorHelpers.cmake"]
+golden = "tests/golden/outputs/halide-defs-cmake-halide-generator-helpers.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-cmake-halide-package-config-helpers"
+inputs = ["tests/data/halide/cmake/HalidePackageConfigHelpers.cmake"]
+golden = "tests/golden/outputs/halide-defs-cmake-halide-package-config-helpers.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-cmake-halide-target-helpers"
+inputs = ["tests/data/halide/cmake/HalideTargetHelpers.cmake"]
+golden = "tests/golden/outputs/halide-defs-cmake-halide-target-helpers.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-cmake-halide-test-helpers"
+inputs = ["tests/data/halide/cmake/HalideTestHelpers.cmake"]
+golden = "tests/golden/outputs/halide-defs-cmake-halide-test-helpers.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-cmake-target-export-script"
+inputs = ["tests/data/halide/cmake/TargetExportScript.cmake"]
+golden = "tests/golden/outputs/halide-defs-cmake-target-export-script.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-cmake-wipe-standard-flags"
+inputs = ["tests/data/halide/cmake/WipeStandardFlags.cmake"]
+golden = "tests/golden/outputs/halide-defs-cmake-wipe-standard-flags.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-deps-spirv-headers-config"
+inputs = ["tests/data/halide/dependencies/spirv/share/cmake/SPIRV-Headers/SPIRV-HeadersConfig.cmake"]
+golden = "tests/golden/outputs/halide-defs-deps-spirv-headers-config.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-packaging"
+inputs = ["tests/data/halide/packaging/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-packaging.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-packaging-common-halide-config"
+inputs = ["tests/data/halide/packaging/common/HalideConfig.cmake"]
+golden = "tests/golden/outputs/halide-defs-packaging-common-halide-config.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-packaging-pip"
+inputs = ["tests/data/halide/packaging/pip/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-packaging-pip.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-python-bindings-cmake-add-python-test"
+inputs = ["tests/data/halide/python_bindings/cmake/AddPythonTest.cmake"]
+golden = "tests/golden/outputs/halide-defs-python-bindings-cmake-add-python-test.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-python-bindings-test-generators"
+inputs = ["tests/data/halide/python_bindings/test/generators/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-python-bindings-test-generators.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-src-autoschedulers"
+inputs = ["tests/data/halide/src/autoschedulers/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-src-autoschedulers.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-test-autoschedulers-anderson2021"
+inputs = ["tests/data/halide/test/autoschedulers/anderson2021/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-test-autoschedulers-anderson2021.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-test-generator"
+inputs = ["tests/data/halide/test/generator/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-test-generator.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-test-runtime"
+inputs = ["tests/data/halide/test/runtime/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-test-runtime.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "halide-defs-tutorial"
+inputs = ["tests/data/halide/tutorial/CMakeLists.txt"]
+golden = "tests/golden/outputs/halide-defs-tutorial.cmake"
+scan_sets = ["halide-definitions"]
+
+[[cases]]
+name = "cmake-modules-cmake-package-config-helpers"
+inputs = ["tests/data/cmake/Modules/CMakePackageConfigHelpers.cmake"]
+golden = "tests/golden/outputs/cmake-modules-cmake-package-config-helpers.cmake"
+
+[cases.config]
+indent_width = 2
+
+[[cases]]
+name = "cmake-modules-fetch-content"
+inputs = ["tests/data/cmake/Modules/FetchContent.cmake"]
+golden = "tests/golden/outputs/cmake-modules-fetch-content.cmake"
+
+[cases.config]
+indent_width = 2
+
+[[cases]]
+name = "cmake-modules-gnu-install-dirs"
+inputs = ["tests/data/cmake/Modules/GNUInstallDirs.cmake"]
+golden = "tests/golden/outputs/cmake-modules-gnu-install-dirs.cmake"
+
+[cases.config]
+indent_width = 2
+
+[[cases]]
+name = "cmake-modules-generate-export-header"
+inputs = ["tests/data/cmake/Modules/GenerateExportHeader.cmake"]
+golden = "tests/golden/outputs/cmake-modules-generate-export-header.cmake"
+
+[cases.config]
+indent_width = 2
+
+[[cases]]
+name = "cmake-modules-write-basic-config-version-file"
+inputs = ["tests/data/cmake/Modules/WriteBasicConfigVersionFile.cmake"]
+golden = "tests/golden/outputs/cmake-modules-write-basic-config-version-file.cmake"
+
+[cases.config]
+indent_width = 2
+
+[[cases]]
+name = "cmake-tests-cmakelists"
+inputs = ["tests/data/cmake/Tests/CMakeLists.txt"]
+golden = "tests/golden/outputs/cmake-tests-cmakelists.cmake"
+
+[cases.config]
+indent_width = 2

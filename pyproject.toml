@@ -1,0 +1,59 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "cmtk"
+dynamic = ["version"]
+description = "A CMake formatter and static analyzer"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Alex Reinking" }
+]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: MIT License",
+]
+
+[dependency-groups]
+dev = [
+    "tbump>=6.10.0",
+]
+
+[tool.maturin]
+bindings = "bin"
+manifest-path = "Cargo.toml"
+
+[tool.tbump.version]
+current = "0.1.0"
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+'''
+
+[tool.tbump.git]
+# Template for the git tag
+tag_template = "v{new_version}"
+
+# Template for the git commit message
+message_template = "Bump to {new_version}"
+
+# Files to update with the new version
+[[tool.tbump.file]]
+src = "Cargo.toml"
+search = 'version = "{current_version}"'
+
+[[tool.tbump.file]]
+src = "pyproject.toml"
+search = 'current = "{current_version}"'
+
+[[tool.tbump.before_commit]]
+name = "Update Cargo.lock"
+cmd = "cargo check && git add Cargo.lock"

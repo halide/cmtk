@@ -34,12 +34,11 @@ def main():
         repo_dir = os.path.join(tmpdir, "repo")
 
         # Write .pre-commit-hooks.yaml
-        hooks_content = f"""- id: cmtk
+        hooks_content = """- id: cmtk
   name: cmtk
   description: Format CMake files in place with cmtk.
   entry: cmtk format --discover=git -i
   language: python
-  additional_dependencies: ["cmtk=={version}"]
   files: (^|/)CMakeLists\\.txt$|\\.cmake(\\.in)?$
   require_serial: true
 
@@ -48,13 +47,24 @@ def main():
   description: Check that CMake files are formatted with cmtk, without modifying them.
   entry: cmtk format --discover=git --check
   language: python
-  additional_dependencies: ["cmtk=={version}"]
   files: (^|/)CMakeLists\\.txt$|\\.cmake(\\.in)?$
   require_serial: true
 """
         hooks_path = os.path.join(repo_dir, ".pre-commit-hooks.yaml")
         with open(hooks_path, "w", encoding="utf-8") as f:
             f.write(hooks_content)
+
+        # Write dummy pyproject.toml with cmtk dependency
+        pyproject_content = f"""[project]
+name = "cmtk-pre-commit"
+version = "0.0.0"
+dependencies = [
+    "cmtk=={version}",
+]
+"""
+        pyproject_path = os.path.join(repo_dir, "pyproject.toml")
+        with open(pyproject_path, "w", encoding="utf-8") as f:
+            f.write(pyproject_content)
 
         # Write README.md if it doesn't exist
         readme_path = os.path.join(repo_dir, "README.md")
@@ -92,7 +102,8 @@ repos:
 
         # Commit, tag, and push
         subprocess.run(
-            ["git", "add", ".pre-commit-hooks.yaml", "README.md"], cwd=repo_dir
+            ["git", "add", ".pre-commit-hooks.yaml", "pyproject.toml", "README.md"],
+            cwd=repo_dir,
         )
 
         # Check if there are changes to commit
@@ -107,27 +118,35 @@ repos:
             return
 
         subprocess.run(["git", "commit", "-m", f"Release v{version}"], cwd=repo_dir)
-        subprocess.run(["git", "tag", f"v{version}"], cwd=repo_dir)
+        subprocess.run(["git", "tag", "-f", f"v{version}"], cwd=repo_dir)
 
         print("Pushing commits and tags to mirror repository...")
+        # Get active branch name
+        branch_res = subprocess.run(
+            ["git", "branch", "--show-current"],
+            cwd=repo_dir,
+            capture_output=True,
+            text=True,
+        )
+        branch = branch_res.stdout.strip() or "main"
+
         push_res = subprocess.run(
-            ["git", "push", "origin", "main", "--tags"],
+            ["git", "push", "origin", branch],
+            cwd=repo_dir,
+            capture_output=True,
+            text=True,
+        )
+        # Push tag (forcefully)
+        subprocess.run(
+            ["git", "push", "-f", "origin", f"v{version}"],
             cwd=repo_dir,
             capture_output=True,
             text=True,
         )
         if push_res.returncode != 0:
-            # If main doesn't exist yet, try master
-            push_res = subprocess.run(
-                ["git", "push", "origin", "master", "--tags"],
-                cwd=repo_dir,
-                capture_output=True,
-                text=True,
-            )
-            if push_res.returncode != 0:
-                print("Error pushing to mirror repository:")
-                print(push_res.stderr)
-                sys.exit(1)
+            print("Error pushing to mirror repository:")
+            print(push_res.stderr)
+            sys.exit(1)
 
         print("Successfully updated and pushed mirror repository!")
 

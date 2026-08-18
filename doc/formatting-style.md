@@ -489,6 +489,42 @@ emits on its own continuation line, indented one level under `COMMAND`. The
 formatter does not emit the hybrid form where the program rides with the
 keyword and later arguments wrap below.
 
+Within a `command_argv` list, a few token pairs are treated as a single unit
+for the purposes of "own continuation line" so that wrapping never separates
+a flag or operator from the thing it applies to. A `-flag value` pair (where
+`value` does not itself look like another flag) stays together, and so does a
+shell redirection operator and the argument that follows it:
+
+```cmake
+add_custom_command(
+    OUTPUT generated.cpp
+    COMMAND
+        generator --emit generated.cpp --target host
+        --output "${CMAKE_CURRENT_BINARY_DIR}/generated.cpp"
+    DEPENDS generator input.txt
+    VERBATIM
+)
+```
+
+```cmake
+add_custom_command(
+    OUTPUT "_initmod_inlined_c.cpp"
+    COMMAND
+        binary2cpp "halide_internal_initmod_inlined_c"
+        < "${CMAKE_CURRENT_SOURCE_DIR}/halide_buffer_t.cpp" > "_initmod_inlined_c.cpp"
+    DEPENDS "halide_buffer_t.cpp" binary2cpp
+    VERBATIM
+)
+```
+
+`<`, `>`, `<<`, `>>`, `<>`, `>|`, `<&`, `>&`, `&>`, `&>>`, and their
+file-descriptor-prefixed forms (`2>`, `2>>`, ...) count as redirection
+operators only when the operator is its own token. This only happens when the
+source has whitespace between the operator and its target, e.g. `> foo.txt`.
+A squished form like `>foo.txt` is already a single token with no following
+target to glue to, so it wraps like any other single argument and is not
+pulled onto a line with an unrelated argument that happens to follow it.
+
 ## Recursive Sub-Parsers
 
 Some command arguments contain nested grammars. When formatting reaches such an

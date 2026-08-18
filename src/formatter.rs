@@ -1888,6 +1888,12 @@ impl Formatter {
                 continue;
             }
 
+            if !after_separator && Self::is_redirect_operator(&value) && iter.peek().is_some() {
+                let next = iter.next().expect("peeked value exists");
+                grouped.push(format!("{value} {next}"));
+                continue;
+            }
+
             if !after_separator
                 && Self::starts_flag_value_pair(&value)
                 && iter
@@ -1904,11 +1910,33 @@ impl Formatter {
         grouped
     }
 
+    /// Matches a standalone shell redirection operator token such as `>`,
+    /// `>>`, `<`, or `2>`. A token that squishes the operator against its
+    /// target (`>foo.txt`) is a single argument already and does not match
+    /// here, so it is left alone rather than glued to whatever follows it.
+    fn is_redirect_operator(value: &str) -> bool {
+        let without_fd = value.trim_start_matches(|c: char| c.is_ascii_digit());
+        if without_fd.len() != value.len() {
+            matches!(
+                without_fd,
+                "<" | ">" | "<<" | ">>" | "<>" | ">|" | "<&" | ">&"
+            )
+        } else {
+            matches!(
+                value,
+                "<" | ">" | "<<" | ">>" | "<>" | ">|" | "<&" | ">&" | "&>" | "&>>"
+            )
+        }
+    }
+
     fn starts_flag_value_pair(value: &str) -> bool {
         value.starts_with('-') && value != "-" && value != "--" && !value.contains('=')
     }
 
     fn can_be_flag_value(value: &str) -> bool {
+        if Self::is_redirect_operator(value) {
+            return false;
+        }
         !value.starts_with('-') || value == "-" || Self::is_negative_number(value)
     }
 

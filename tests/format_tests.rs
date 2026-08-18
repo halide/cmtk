@@ -726,6 +726,62 @@ fn test_typed_command_argv_keeps_negative_number_values_with_flags() {
 }
 
 #[test]
+fn test_typed_command_argv_wraps_before_redirect_operator_not_after() {
+    // At this width, the line breaks between `--extra-flag` and `>`. Without
+    // the redirect/target pairing, the break would instead land between `>`
+    // and `foo.txt` (the operator riding with `--extra-flag` as if it were
+    // that flag's value), splitting the operator from its target.
+    let mut functions = HashMap::new();
+    functions.insert(
+        "my_command".to_string(),
+        FunctionSchema {
+            multi_value_keywords: vec!["COMMAND".to_string()],
+            list_keyword_types: [("COMMAND".to_string(), ListType::CommandArgv)]
+                .into_iter()
+                .collect(),
+            ..Default::default()
+        },
+    );
+    let config = Config {
+        function_schemas: SchemaRegistry { functions },
+        line_width: 33,
+        ..Default::default()
+    };
+    let src = "my_command(COMMAND tool --verbose --extra-flag > foo.txt)\n";
+    let out = format(src, config);
+    assert_eq!(
+        out,
+        "my_command(\n    COMMAND\n        tool --verbose --extra-flag\n        > foo.txt\n)\n"
+    );
+}
+
+#[test]
+fn test_typed_command_argv_does_not_pair_squished_redirect_with_unrelated_argument() {
+    let mut functions = HashMap::new();
+    functions.insert(
+        "my_command".to_string(),
+        FunctionSchema {
+            multi_value_keywords: vec!["COMMAND".to_string()],
+            list_keyword_types: [("COMMAND".to_string(), ListType::CommandArgv)]
+                .into_iter()
+                .collect(),
+            ..Default::default()
+        },
+    );
+    let config = Config {
+        function_schemas: SchemaRegistry { functions },
+        line_width: 22,
+        ..Default::default()
+    };
+    let src = "my_command(COMMAND tool >foo.txt bar.txt)\n";
+    let out = format(src, config);
+    assert_eq!(
+        out,
+        "my_command(\n    COMMAND\n        tool >foo.txt\n        bar.txt\n)\n"
+    );
+}
+
+#[test]
 fn test_typed_command_argv_does_not_pair_dash_separator_or_equals_flags() {
     let mut functions = HashMap::new();
     functions.insert(

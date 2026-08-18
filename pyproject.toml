@@ -57,7 +57,3 @@ search = 'current = "{current_version}"'
 [[tool.tbump.before_commit]]
 name = "Update Cargo.lock"
 cmd = "cargo check && git add Cargo.lock"
-
-[[tool.tbump.after_push]]
-name = "Update pre-commit mirror repository"
-cmd = "python3 tools/update_mirror.py {new_version}"

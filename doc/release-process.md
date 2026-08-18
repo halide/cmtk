@@ -6,11 +6,13 @@ This document describes how to release a new version of `cmtk` to PyPI and updat
 
 ## Overview of the Automation
 
-We use `tbump` locally to coordinate version bumping across files, git tagging, and repository syncing.
-Once a version tag (e.g. `v0.1.1`) is pushed to GitHub:
+We use `tbump` locally to coordinate version bumping across files, git tagging, and pushing the release
+tag. Once a version tag (e.g. `v0.1.1`) is pushed to GitHub, everything else happens in CI:
 1. **GitHub Actions** compiles the Rust executable and builds Python wheels for all target platforms.
 2. **PyPI Trusted Publishing (OIDC)** publishes the built wheels to PyPI.
-3. The local `tbump` process automatically updates and pushes tags to the **`cmtk-pre-commit`** mirror repository so users can consume precompiled wheels.
+3. Only after that publish succeeds, a final `update-mirror` job updates and pushes the
+   **`cmtk-pre-commit`** mirror repository so users can consume precompiled wheels. Gating this on the
+   publish job means the mirror never advertises a version before it's actually installable from PyPI.
 
 ---
 
@@ -29,7 +31,8 @@ If you have permission to push directly to the `main` branch, you can perform a 
    - Commit the changes locally as `"Bump to 0.1.1"`.
    - Tag the commit as `v0.1.1`.
    - Push the branch and tag to GitHub.
-   - Run an `after_push` hook: clones `cmtk-pre-commit` locally, updates `.pre-commit-hooks.yaml` to point to `cmtk==0.1.1`, commits/tags/pushes to the mirror repository.
+3. **Wait for CI**. Once the tag lands, GitHub Actions builds wheels, publishes to PyPI, and then
+   updates the `cmtk-pre-commit` mirror automatically — no local follow-up step is needed.
 
 ---
 
@@ -60,12 +63,8 @@ If the `main` branch is protected and you cannot push directly:
    git pull origin main
    git push origin v0.1.1
    ```
-   *Pushing the tag does not trigger branch protection and will kick off the PyPI release workflow.*
-6. **Update the Pre-Commit Mirror**:
-   Run the mirror update script manually to sync the pre-commit repository:
-   ```bash
-   python3 tools/update_mirror.py 0.1.1
-   ```
+   *Pushing the tag does not trigger branch protection and will kick off the PyPI release workflow,
+   including the `update-mirror` job that syncs `cmtk-pre-commit` once the PyPI publish succeeds.*
 
 ---
 
@@ -83,3 +82,11 @@ This project uses OIDC to authenticate with PyPI. The publisher settings are:
 * **GitHub Repository Owner**: `halide`
 * **Repository Name**: `cmtk`
 * **Workflow Name**: `release.yml`
+
+### Pre-Commit Mirror Updates
+The `update-mirror` job runs `tools/update_mirror.py` after the `publish` job succeeds (gated with
+`needs: [publish]`), so a tag can never advertise a version that isn't on PyPI yet. It authenticates to
+`cmtk-pre-commit` over HTTPS using a repo secret named `CMTK_MIRROR_TOKEN` — a fine-grained GitHub PAT
+scoped to *only* the `halide/cmtk-pre-commit` repository with **Contents: Read and write** permission.
+Local runs of `tools/update_mirror.py` (e.g. for the protected-branch workflow, if it's ever needed
+again) don't set `CMTK_MIRROR_TOKEN` and fall back to the developer's own SSH credentials instead.

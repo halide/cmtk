@@ -12,14 +12,24 @@ def main():
         sys.exit(1)
 
     version = sys.argv[1]
-    repo_url = "git@github.com:halide/cmtk-pre-commit.git"
+
+    # Locally, developers authenticate over SSH using their own key. In CI,
+    # there's no SSH key for the bot, so a fine-grained PAT (scoped to just
+    # this mirror repo) is used over HTTPS instead.
+    token = os.environ.get("CMTK_MIRROR_TOKEN")
+    if token:
+        repo_url = (
+            f"https://x-access-token:{token}@github.com/halide/cmtk-pre-commit.git"
+        )
+    else:
+        repo_url = "git@github.com:halide/cmtk-pre-commit.git"
 
     print(f"Updating pre-commit mirror to version {version}...")
 
     # Create a temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
         # Clone the mirror repo
-        print(f"Cloning {repo_url} into temp dir...")
+        print("Cloning mirror repository into temp dir...")
         res = subprocess.run(
             ["git", "clone", repo_url, "repo"],
             cwd=tmpdir,
@@ -32,6 +42,21 @@ def main():
             sys.exit(1)
 
         repo_dir = os.path.join(tmpdir, "repo")
+
+        if token:
+            # The CI bot has no git identity configured; local developers
+            # already have one and should keep authoring mirror commits
+            # under their own name.
+            subprocess.run(
+                ["git", "config", "user.name", "cmtk-release-bot"],
+                cwd=repo_dir,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.email", "actions@users.noreply.github.com"],
+                cwd=repo_dir,
+                check=True,
+            )
 
         # Write .pre-commit-hooks.yaml
         hooks_content = """- id: cmtk
